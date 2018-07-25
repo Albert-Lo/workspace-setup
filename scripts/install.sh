@@ -127,6 +127,29 @@ function install_mongo {
     echo -e "Failed to install MongoDB";
     exit 1;
   fi
+
+  return 0;
+}
+
+function install_elasticsearch {
+  local _cwd=$(pwd);
+
+  cd /tmp
+  echo "Installing Elasticsearch";
+  curl -L -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.10.deb
+  if [ $? != 0 ]; then
+    echo -e "Failed to download Elasticsearch";
+    exit 1;
+  fi
+
+  dpkg -i elasticsearch-5.6.10.deb
+  if [ $? != 0 ]; then
+    echo -e "Failed to install Elasticsearch";
+    exit 1;
+  fi
+
+  cd $_cwd;
+  return 0;
 }
 
 function install_redis {
@@ -170,7 +193,7 @@ function install_imagemagick {
     echo -e "Failed to configure Imagemagick install";
     exit 1;
   fi
-  checkinstall;
+  checkinstall > /dev/null;
   if [ $? != 0 ]; then
     echo -e "Failed to install Imagemagick";
     exit 1;
@@ -185,25 +208,7 @@ function install_graphicsmagick {
 
   echo "Installing GraphcisMagick";
 
-  cd /tmp;
-  wget ftp://ftp.graphicsmagick.org/pub/GraphicsMagick/1.3/GraphicsMagick-1.3.30.tar.gz;
-  if [ $? != 0 ]; then
-    echo -e "Failed to download GraphicsMagick";
-    exit 1;
-  fi
-  tar -xzvf GraphicsMagick-1.3.30.tar.gz > /dev/null;
-  cd GraphicsMagick-1.3.30;
-  ./configure > /dev/null;
-  if [ $? != 0 ]; then
-    echo -e "Failed to configure GraphicsMagick install";
-    exit 1;
-  fi
-  make > /dev/null;
-  if [ $? != 0 ]; then
-    echo -e "Failed to install GraphicsMagick";
-    exit 1;
-  fi
-  make install; > /dev/null
+  apt-get install graphcismagick
   if [ $? != 0 ]; then
     echo -e "Failed to install GraphicsMagick";
     exit 1;
@@ -258,6 +263,25 @@ function install_opencv {
   return 0;
 }
 
+function install_nginx {
+  echo "Installing nginx";
+  apt-get install nginx -y > /dev/null
+  if [ $? != 0 ]; then
+    echo -e "Failed to install nginx";
+    exit 1;
+  fi
+  return 0;
+}
+
+function install_boost {
+  echo "Installing boost";
+  apt-get install libboost-all-dev -y > /dev/null;
+  if [ $? != 0 ]; then
+    echo -e "Failed to install boost";
+    exit 1;
+  fi
+}
+
 function install_lang_runtime {
   local _USER=$1;
   # ---
@@ -276,41 +300,15 @@ function install_lang_runtime {
 function install_dev_tools {
   install_mongo;
 
+  install_nginx;
 
-  echo "Installing nginx";
-  apt-get install nginx -y > /dev/null
-  if [ $? != 0 ]; then
-    echo -e "Failed to install nginx";
-    exit 1;
-  fi
-
-  echo "Installing Elasticsearch";
-  wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-  if [ $? != 0 ]; then
-    echo -e "Failed to add key for Elasticsearch";
-    exit 1;
-  fi
-
-  apt-get install apt-transport-https;
-  if [ $? != 0 ]; then
-    echo -e "Failed to install apt-transport-https";
-    exit 1;
-  fi
-  echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-6.x.list
-  apt-get update > /dev/null;
-  apt-get install elasticsearch -y > /dev/null;
-
+  install_elasticsearch;
 
   install_imagemagick;
 
   install_graphicsmagick;
 
-  echo "Installing boost";
-  apt-get install libboost-all-dev -y > /dev/null;
-  if [ $? != 0 ]; then
-    echo -e "Failed to install boost";
-    exit 1;
-  fi
+  install_boost;
 
   install_opencv;
 
