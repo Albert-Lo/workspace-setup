@@ -320,7 +320,7 @@ function install_dev_tools {
 function main {
   local _USER=$1;
 
-  # update_apt;
+  update_apt;
   install_lang_runtime $_USER;
   install_dev_tools;
   install_cli_tools;
