@@ -153,17 +153,11 @@ function install_elasticsearch {
 }
 
 function install_redis {
-  local _cwd=$(pwd);
-
-  echo "Installing Redis";
-  apt-get install build-essential tcl -y > /dev/null;
-  cd /tmp;
-  curl -O http://download.redis.io/redis-stable.tar.gz > /dev/null;
-  tar xzvf redis-stable.tar.gz > /dev/null;
-  cd redis-stable;
-  make > /dev/null;
-  make install > /dev/null;
-  cd $_cwd;
+  apt-get install redis-server -y > /dev/null
+  if [ $? != 0 ]; then
+    echo -e "Failed to install Redis";
+    exit 1;
+  fi
 
   return 0;
 }
@@ -208,7 +202,7 @@ function install_graphicsmagick {
 
   echo "Installing GraphcisMagick";
 
-  apt-get install graphcismagick
+  apt-get install graphicsmagick -y > /dev/null;
   if [ $? != 0 ]; then
     echo -e "Failed to install GraphicsMagick";
     exit 1;
@@ -221,7 +215,7 @@ function install_graphicsmagick {
 function install_opencv {
   local _cwd=$(pwd);
 
-  echo "Installing opencv":
+  echo "Installing opencv"
   apt-get install libopencv-dev build-essential cmake git libgtk2.0-dev pkg-config python-dev python-numpy libdc1394-22 libdc1394-22-dev libjpeg-dev libpng12-dev libtiff4-dev libjasper-dev libavcodec-dev libavformat-dev libswscale-dev libxine-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libv4l-dev libtbb-dev libqt4-dev libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils unzip -y > /dev/null;
   if [ $? != 0 ]; then
     echo -e "Failed to install opencv dependencies";
@@ -253,7 +247,11 @@ function install_opencv {
   ldconfig > /dev/null;
   cd $_cwd;
 
-  echo "Installing cairo":
+  return 0;
+}
+
+function install_cairo {
+  echo "Installing cairo"
   apt-get install libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++ -y > /dev/null; 
   if [ $? != 0 ]; then
     echo -e "Failed to install cairo";
@@ -311,6 +309,8 @@ function install_dev_tools {
   install_boost;
 
   install_opencv;
+
+  install_cairo;
 
   return 0;
 }
